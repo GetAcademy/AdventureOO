@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <div id="app"></div>
+    <script>
+        const model = {
+            spiller: {
+                har: [],
+            },
+            rom: [
+                { navn: 'A', innhold: ['rød nøkkel'], start: true },
+                { navn: 'B', innhold: ['grønn nøkkel'] },
+                { navn: 'C', innhold: ['hvit nøkkel'] },
+                { navn: 'D', innhold: ['blå nøkkel'] },
+                { navn: 'E', innhold: ['grå nøkkel'] },
+                { navn: 'F', innhold: [], vunnet: true },
+            ],
+            dører: [
+                { A: 'B', B: 'A', farge: 'rød', åpen: false },
+                { A: 'D', D: 'A', farge: 'grønn', åpen: false },
+                { B: 'C', C: 'B', farge: 'grå', åpen: false },
+                { B: 'E', E: 'B', farge: 'blå', åpen: false },
+                { E: 'F', F: 'E', farge: 'hvit', åpen: false },
+            ]
+        };
+        model.spiller.rom = model.rom.filter(r => r.start)[0];
+
+        updateView();
+        function updateView() {
+            const headerText = model.spiller.rom.vunnet
+                ? 'Gratulerer - du har fullført spillet! :-)'
+                : `Du er i rom ${model.spiller.rom.navn}`;
+            document.getElementById('app').innerHTML = `
+                <h3>${headerText}</h3>
+                <p>
+                    I rommet ser du:
+                    ${roomContent()}    
+                </p><p>
+                    Du har:
+                    ${inventory()}
+                </p><p>
+                    Dører:
+                    <ul>
+                        ${doors()}
+                    </ul>
+                </p>
+            `;
+        }
+
+        function roomContent(){
+            if(model.spiller.rom.innhold.length == 0) return '<i>ingenting</i>';
+            let html = '<ul>';
+            for(let ting of model.spiller.rom.innhold){
+                html += `<li>${ting} <button onclick="plukkOpp('${ting}'')">Plukk opp</button></li>`;
+            }
+            html += '</ul>';
+            return html;
+        }
+
+        function inventory(){
+            if(model.spiller.har.length == 0) return '<i>ingenting</i>';
+            let html = '<ul>';
+            for(let ting of model.spiller.har){
+                html += `<li>${ting}</li>`;
+            }
+            html += '</ul>';
+            return html;
+        }
+      
+        function doors(){
+            let romNavn = model.spiller.rom.navn;
+            let dører = model.dører
+            .filter(d=>d.hasOwnProperty(romNavn))
+            .map(d=>{return {farge: d.farge, til: d[romNavn], åpen: d.åpen}});
+            let html = '';
+            for(let dør of dører){
+                const knapp = dør.åpen
+                 ? `<button onclick="gåTil('${dør.til}'')">Gå gjennom</button>`
+                 : `<button onclick="låseOpp('${dør.farge}')">Låse opp</button>`;
+                html += `${dør.farge} dør til rom ${dør.til} ${knapp}<br/>`;
+            }
+            return html;
+        }
+
+        
+    </script>
+
+</body>
+
+</html>
