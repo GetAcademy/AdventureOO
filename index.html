@@ -54,44 +54,63 @@
             `;
         }
 
-        function roomContent(){
-            if(model.spiller.rom.innhold.length == 0) return '<i>ingenting</i>';
+        function roomContent() {
+            if (model.spiller.rom.innhold.length == 0) return '<i>ingenting</i>';
             let html = '<ul>';
-            for(let ting of model.spiller.rom.innhold){
-                html += `<li>${ting} <button onclick="plukkOpp('${ting}'')">Plukk opp</button></li>`;
+            for (let ting of model.spiller.rom.innhold) {
+                html += `<li>${ting} <button onclick="plukkOpp('${ting}')">Plukk opp</button></li>`;
             }
             html += '</ul>';
             return html;
         }
 
-        function inventory(){
-            if(model.spiller.har.length == 0) return '<i>ingenting</i>';
+        function inventory() {
+            if (model.spiller.har.length == 0) return '<i>ingenting</i>';
             let html = '<ul>';
-            for(let ting of model.spiller.har){
+            for (let ting of model.spiller.har) {
                 html += `<li>${ting}</li>`;
             }
             html += '</ul>';
             return html;
         }
-      
-        function doors(){
+
+        function doors() {
             let romNavn = model.spiller.rom.navn;
             let dører = model.dører
-            .filter(d=>d.hasOwnProperty(romNavn))
-            .map(d=>{return {farge: d.farge, til: d[romNavn], åpen: d.åpen}});
+                .filter(d => d.hasOwnProperty(romNavn))
+                .map(d => { return { farge: d.farge, til: d[romNavn], åpen: d.åpen } });
             let html = '';
-            for(let dør of dører){
-                const knapp = dør.åpen
-                 ? `<button onclick="gåTil('${dør.til}'')">Gå gjennom</button>`
-                 : `<button onclick="låseOpp('${dør.farge}')">Låse opp</button>`;
+            for (let dør of dører) {
+                const knapp = dør.åpen ? `<button onclick="gåTil('${dør.til}')">Gå gjennom</button>` :
+                    kanÅpne(dør) ? `<button onclick="låseOpp('${dør.farge}')">Låse opp</button>` :
+                        '';
                 html += `${dør.farge} dør til rom ${dør.til} ${knapp}<br/>`;
             }
             return html;
         }
 
-        
-    </script>
+        function kanÅpne(dør) {
+            return model.spiller.har.includes(dør.farge + ' nøkkel');
+        }
 
+        // controller
+        function plukkOpp(ting) {
+            model.spiller.har.push(ting);
+            model.spiller.rom.innhold = model.spiller.rom.innhold.filter(t => t != ting);
+            updateView();
+        }
+
+        function låseOpp(dørFarge) {
+            let dør = model.dører.filter(d => d.farge == dørFarge)[0];
+            dør.åpen = true;
+            updateView();
+        }
+
+        function gåTil(rom) {
+            model.spiller.rom = model.rom.filter(r => r.navn === rom)[0];
+            updateView();
+        }                
+    </script>
 </body>
 
 </html>
